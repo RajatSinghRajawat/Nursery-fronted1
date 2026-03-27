@@ -11,7 +11,6 @@ function Footer() {
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
     { label: 'Products', href: '/products' },
-    { label: 'Gallery', href: '/gallery' },
     { label: 'Testimonials', href: '/testimonials' },
     { label: 'Contact', href: '/contact' },
     { label: 'Login', href: '/login' },

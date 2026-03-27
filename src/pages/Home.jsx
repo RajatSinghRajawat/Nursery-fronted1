@@ -86,7 +86,7 @@ const slidesData = [
       'From indoor plants to outdoor greenery, find the perfect plants to refresh your space.',
     buttonLabel: 'Shop Plants',
     badge: 'Curated collection',
-    href: '#gallery',
+    href: '#products',
     stats: ['Indoor and outdoor picks', 'Decor-ready styling'],
     palette: 'from-[#2b2a1f] via-[#5a6a37] to-[#dcc690]',
     texture:
@@ -166,48 +166,6 @@ const categoriesData = [
   },
 ];
 
-const productsData = [
-  {
-    id: 1,
-    name: 'Fiddle Leaf Fig',
-    price: 89,
-    rating: 4.8,
-    reviews: 124,
-    category: 'Indoor',
-    image: 'https://images.unsplash.com/photo-1597072689227-8882273e8f6a?q=80&w=800&auto=format&fit=crop',
-    tag: 'Best Seller'
-  },
-  {
-    id: 2,
-    name: 'Monstera Deliciosa',
-    price: 65,
-    rating: 4.9,
-    reviews: 89,
-    category: 'Indoor',
-    image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=800&auto=format&fit=crop',
-    tag: 'Popular'
-  },
-  {
-    id: 3,
-    name: 'Snake Plant Zeylanica',
-    price: 45,
-    rating: 4.7,
-    reviews: 156,
-    category: 'Low Light',
-    image: 'https://planetdesert.com/cdn/shop/files/1-Collection-Image-Zeylanica-Snake-Plant-_Sansevieria-zeylanica_-3-Gallon_3.jpg?v=1770093664p',
-    tag: 'Air Purifier'
-  },
-  {
-    id: 4,
-    name: 'Olive Tree',
-    price: 120,
-    rating: 5.0,
-    reviews: 42,
-    category: 'Outdoor',
-    image: 'https://www.kadiyamrajasrinursery.com/cdn/shop/files/51V4tfWOXKL_500x500.jpg?v=1689961433',
-    tag: 'Premium'
-  }
-];
 
 const whyChooseUsData = [
   {
@@ -240,49 +198,6 @@ const whyChooseUsData = [
   },
 ]
 
-const bestSellingPlantsData = [
-  {
-    id: 1,
-    name: 'Snake Plant',
-    price: 399,
-    rating: 4.8,
-    reviews: 186,
-    image: 'https://rukminim2.flixcart.com/image/480/640/xif0q/plant-sapling/s/c/r/yes-perennial-no-indoor-snake-live-plant-medium-1-grow-bag-green-original-imagxpjytshv8tct.jpeg?q=90',
-    tag: 'Best Seller',
-    badge: 'Low Maintenance',
-  },
-  {
-    id: 2,
-    name: 'Aloe Vera',
-    price: 299,
-    rating: 4.7,
-    reviews: 142,
-    image: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=900&auto=format&fit=crop',
-    tag: 'Top Rated',
-    badge: 'Healing Pick',
-  },
-  {
-    id: 3,
-    name: 'Money Plant',
-    price: 249,
-    rating: 4.9,
-    reviews: 214,
-    image: 'https://m.media-amazon.com/images/I/81YM-QmE+KS._AC_UF1000,1000_QL80_.jpg',
-    tag: 'Most Loved',
-    badge: 'Indoor Favorite',
-  },
-  {
-    id: 4,
-    name: 'Peace Lily',
-    price: 499,
-    rating: 4.8,
-    reviews: 128,
-    image: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=900&auto=format&fit=crop',
-    tag: 'Premium',
-    badge: 'Air Purifier',
-  },
-]
-
 const testimonialsData = [
   {
     id: 1,
@@ -310,40 +225,6 @@ const testimonialsData = [
   },
 ]
 
-const galleryPreviewData = [
-  {
-    id: 1,
-    title: 'Indoor Greens',
-    image: 'https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'Flower Corner',
-    image: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    id: 3,
-    title: 'Nursery Walkway',
-    image: 'https://images.unsplash.com/photo-1512428813834-c702c7702b78?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    id: 4,
-    title: 'Styled Planters',
-    image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    id: 5,
-    title: 'Garden Setup',
-    image: 'https://images.unsplash.com/photo-1592150621744-aca64f48394a?q=80&w=900&auto=format&fit=crop',
-  },
-  {
-    id: 6,
-    title: 'Customer Favorites',
-    image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=900&auto=format&fit=crop',
-  },
-]
-
-
 function Home() {
   const navigate = useNavigate()
   const [activeSlide, setActiveSlide] = useState(0)
@@ -365,14 +246,21 @@ function Home() {
   }, [])
 
   const topPicks = useMemo(() => {
-    if (featuredFromApi.length >= 4) return featuredFromApi.slice(0, 4).map(mapApiToTopPick)
-    return productsData
+    return featuredFromApi.slice(0, 4).map(mapApiToTopPick)
   }, [featuredFromApi])
 
   const bestSellingList = useMemo(() => {
-    if (featuredFromApi.length >= 8) return featuredFromApi.slice(4, 8).map(mapApiToBestSeller)
-    return bestSellingPlantsData
+    return featuredFromApi.slice(4, 8).map(mapApiToBestSeller)
   }, [featuredFromApi])
+
+  const openProduct = (product) => {
+    const pid = product?._id || product?.id
+    if (pid && typeof pid === 'string' && pid.length === 24) {
+      goTo(`/product/${pid}`)
+      return
+    }
+    goTo('/products')
+  }
 
   const goTo = (path) => {
     if (path.startsWith('#')) {
@@ -402,7 +290,9 @@ function Home() {
       }
       navigate('/cart')
       return
-    }  }
+    }
+    window.alert('Product is unavailable right now.')
+  }
 
   const iconMap = {
     Indoor: HiOutlineHomeModern,
@@ -757,6 +647,7 @@ function Home() {
                   <img
                     src={product.image}
                     alt={product.name}
+                    onClick={() => openProduct(product)}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute top-4 right-4 z-10">
@@ -786,7 +677,12 @@ function Home() {
                       <span className="text-xs font-bold text-slate-900">{product.rating}</span>
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-emerald-950 mb-1 group-hover:text-emerald-600 transition-colors">{product.name}</h3>
+                  <h3
+                    className="text-xl font-bold text-emerald-950 mb-1 cursor-pointer group-hover:text-emerald-600 transition-colors"
+                    onClick={() => openProduct(product)}
+                  >
+                    {product.name}
+                  </h3>
                   {product.subtitle ? (
                     <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{product.subtitle}</p>
                   ) : null}
@@ -797,7 +693,11 @@ function Home() {
                       ) : null}
                       <p className="text-lg font-bold text-emerald-900">₹{product.price}</p>
                     </div>
-                    <button type="button" onClick={() => goTo('/gallery')} className="text-sm font-bold text-slate-400 hover:text-emerald-600 border-b border-transparent hover:border-emerald-600 transition-all">
+                    <button
+                      type="button"
+                      onClick={() => openProduct(product)}
+                      className="text-sm font-bold text-slate-400 hover:text-emerald-600 border-b border-transparent hover:border-emerald-600 transition-all"
+                    >
                       Quick View
                     </button>
                   </div>
@@ -883,6 +783,7 @@ function Home() {
                     <img
                       src={plant.image}
                       alt={plant.name}
+                      onClick={() => openProduct(plant)}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 via-transparent to-transparent opacity-70" />
@@ -912,7 +813,7 @@ function Home() {
                       <span className="text-xs font-medium text-slate-400">({plant.reviews})</span>
                     </div>
                   </div>
-                  <h3 className="mb-2 text-2xl font-bold text-emerald-950 transition-colors group-hover:text-emerald-600">{plant.name}</h3>
+                  <h3 className="mb-2 cursor-pointer text-2xl font-bold text-emerald-950 transition-colors group-hover:text-emerald-600" onClick={() => openProduct(plant)}>{plant.name}</h3>
                   {plant.subtitle ? (
                     <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{plant.subtitle}</p>
                   ) : null}
@@ -923,7 +824,11 @@ function Home() {
                       ) : null}
                       <p className="text-xl font-bold text-emerald-900">₹{plant.price}</p>
                     </div>
-                    <button type="button" onClick={() => goTo('/gallery')} className="text-sm font-bold text-slate-400 transition-all hover:text-emerald-600">
+                    <button
+                      type="button"
+                      onClick={() => openProduct(plant)}
+                      className="text-sm font-bold text-slate-400 transition-all hover:text-emerald-600"
+                    >
                       Quick View
                     </button>
                   </div>
@@ -931,6 +836,7 @@ function Home() {
               </article>
             ))}
           </div>
+          {!topPicks.length ? <p className="mt-8 text-center text-slate-500">Products are loading. Please refresh once backend products are available.</p> : null}
         </div>
       </section>
 
@@ -980,59 +886,6 @@ function Home() {
                   </div>
                 </div>
               </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="gallery" className="overflow-hidden bg-white px-6 py-32">
-        <div className="mx-auto max-w-[1400px]">
-          <div className="mb-20 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-4 flex items-center gap-3">
-                <span className="h-[2px] w-12 bg-emerald-600"></span>
-                <span className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">Our Plant Gallery</span>
-              </div>
-              <h2 className="text-5xl font-bold leading-[1.1] text-emerald-950 md:text-6xl">
-                Beautiful Plants From <span className="text-emerald-600">Our Nursery</span>
-              </h2>
-            </div>
-            <a
-              href="/gallery"
-              className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 px-6 py-3 text-sm font-bold text-emerald-900 transition hover:border-emerald-600 hover:bg-emerald-50"
-            >
-              View Full Gallery
-              <FiArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {galleryPreviewData.map((item, index) => (
-              <a
-                key={item.id}
-                href={item.image}
-                target="_blank"
-                rel="noreferrer"
-                className={`group relative overflow-hidden rounded-[2rem] bg-emerald-50 ${index === 1 || index === 4 ? 'sm:translate-y-8 xl:translate-y-10' : ''}`}
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 via-emerald-950/15 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95" />
-                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.26em] text-emerald-100/85">Gallery Preview</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-2xl font-bold">{item.title}</h3>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-sm">
-                      <FiArrowRight className="h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
-              </a>
             ))}
           </div>
         </div>

@@ -46,10 +46,18 @@ export async function addCartItemByProductId(productId, quantity = 1) {
   if (!getCurrentUser()) {
     return { ok: false, message: 'Please login to add items to cart.' }
   }
+  const pid = String(productId || '').trim()
+  const qty = Number(quantity)
+  if (!pid || pid.length !== 24) {
+    return { ok: false, message: 'Invalid product selected.' }
+  }
+  if (!Number.isFinite(qty) || qty <= 0) {
+    return { ok: false, message: 'Quantity must be greater than 0.' }
+  }
   try {
     await api('/cart/items', {
       method: 'POST',
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify({ productId: pid, quantity: qty }),
     })
     notifyCartChange()
     return { ok: true }

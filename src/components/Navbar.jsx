@@ -149,9 +149,7 @@ function Navbar() {
   const currentPage =
     location.pathname === '/about'
       ? 'about'
-      : location.pathname === '/gallery'
-        ? 'gallery'
-        : location.pathname === '/testimonials'
+      : location.pathname === '/testimonials'
           ? 'testimonials'
           : location.pathname === '/contact'
             ? 'contact'
@@ -162,7 +160,6 @@ function Navbar() {
                 : 'home'
 
   const navItems = [
-    { label: 'Gallery', path: '/gallery' },
     { label: 'Testimonials', path: '/testimonials' },
     { label: 'Contact', path: '/contact' },
   ]

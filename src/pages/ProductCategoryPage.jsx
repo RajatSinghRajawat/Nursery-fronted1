@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { HiOutlineArrowRight, HiOutlineCheckBadge, HiOutlineSparkles } from 'react-icons/hi2'
 import { useNavigate } from 'react-router-dom'
-// import { addCartItemByProductId } from '../utils/cart'
-// import { getCurrentUser } from '../utils/userStore'
+import { addCartItemByProductId } from '../utils/cart'
+import { getCurrentUser } from '../utils/userStore'
 import { api } from '../utils/api'
 
 const iconBadgeClass = {
@@ -287,8 +287,8 @@ function ProductCategoryPage({ category }) {
                 Best Picks In <span className="text-emerald-600">{catData?.name || category?.name}</span>
               </h2>
             </div>
-            <a href="/gallery" className="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-6 py-3 text-sm font-bold text-emerald-900 transition hover:border-emerald-600 hover:bg-emerald-50">
-              View Plant Gallery
+            <a href="/products" className="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-6 py-3 text-sm font-bold text-emerald-900 transition hover:border-emerald-600 hover:bg-emerald-50">
+              Explore More Categories
               <HiOutlineArrowRight className="h-5 w-5" />
             </a>
           </div>
@@ -300,14 +300,19 @@ function ProductCategoryPage({ category }) {
                 className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-[#f8faf7] shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
               >
                 <div className="aspect-[4/4.5] overflow-hidden">
-                  <img src={item.image} alt={item.name} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    onClick={() => (item._id ? navigate(`/product/${item._id}`) : handleAddToCart(item))}
+                    className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">
                     <HiOutlineSparkles className="h-4 w-4" />
                     In stock
                   </div>
-                  <h3 className="text-2xl font-bold text-emerald-950">{item.name}</h3>
+                  <h3 className="cursor-pointer text-2xl font-bold text-emerald-950" onClick={() => (item._id ? navigate(`/product/${item._id}`) : handleAddToCart(item))}>{item.name}</h3>
                   {item.subtitle ? (
                     <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{item.subtitle}</p>
                   ) : null}
@@ -319,10 +324,10 @@ function ProductCategoryPage({ category }) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleAddToCart(item)}
+                    onClick={() => (item._id ? navigate(`/product/${item._id}`) : handleAddToCart(item))}
                     className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800"
                   >
-                    Add To Cart
+                    View Product
                     <HiOutlineArrowRight className="h-4 w-4" />
                   </button>
                 </div>

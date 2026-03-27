@@ -1,54 +1,18 @@
+import { useEffect, useMemo, useState } from 'react'
 import { FiPlay } from 'react-icons/fi'
 import { HiOutlineStar } from 'react-icons/hi2'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../utils/api'
+import { getCurrentUser } from '../utils/userStore'
 
-const reviewsData = [
+const fallbackReviews = [
   {
-    id: 1,
+    _id: 'f1',
     name: 'Ravi Sharma',
     city: 'Jaipur',
     rating: 5,
     review: 'Very fresh plants and great packaging. The plants looked exactly like the photos and settled quickly at home.',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=500&auto=format&fit=crop',
-  },
-  {
-    id: 2,
-    name: 'Anjali Verma',
-    city: 'Delhi',
-    rating: 4,
-    review: 'Delivery was quick and plants were healthy. Support also helped me pick easy indoor plants for my apartment.',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=500&auto=format&fit=crop',
-  },
-  {
-    id: 3,
-    name: 'Mohit Singh',
-    city: 'Udaipur',
-    rating: 5,
-    review: 'Good quality and nice packaging. The money plant and snake plant both came in strong condition.',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500&auto=format&fit=crop',
-  },
-  {
-    id: 4,
-    name: 'Priya Nair',
-    city: 'Bengaluru',
-    rating: 5,
-    review: 'The nursery team recommended the right low-light plants and every item arrived neat, fresh, and premium.',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=500&auto=format&fit=crop',
-  },
-  {
-    id: 5,
-    name: 'Karan Patel',
-    city: 'Ahmedabad',
-    rating: 4,
-    review: 'Great buying experience. The planters and plants matched well and the overall quality felt trustworthy.',
-    image: 'https://images.unsplash.com/photo-1504593811423-6dd665756598?q=80&w=500&auto=format&fit=crop',
-  },
-  {
-    id: 6,
-    name: 'Sneha Kapoor',
-    city: 'Chandigarh',
-    rating: 5,
-    review: 'Fast delivery and very helpful support. Their care tips made it easy to maintain my balcony setup.',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=500&auto=format&fit=crop',
   },
 ]
 
@@ -96,13 +60,83 @@ const communityPhotos = [
   },
 ]
 
-const ratingBars = [
-  { label: '5★', width: '80%' },
-  { label: '4★', width: '15%' },
-  { label: '3★', width: '5%' },
-]
-
 function Testimonials() {
+  const navigate = useNavigate()
+  const [items, setItems] = useState([])
+  const [statusMessage, setStatusMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [formData, setFormData] = useState({ name: '', email: '', city: '', rating: '5', review: '' })
+  const currentUser = getCurrentUser()
+
+  const loadTestimonials = async () => {
+    try {
+      const data = await api('/testimonials')
+      setItems(data.items || [])
+    } catch {
+      setItems([])
+    }
+  }
+
+  useEffect(() => {
+    loadTestimonials()
+  }, [])
+
+  useEffect(() => {
+    if (currentUser?.fullName || currentUser?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || currentUser.fullName || '',
+        email: prev.email || currentUser.email || '',
+      }))
+    }
+  }, [currentUser?.email, currentUser?.fullName])
+
+  const reviewsData = items.length ? items : fallbackReviews
+  const average = useMemo(() => {
+    if (!reviewsData.length) return 0
+    return (
+      reviewsData.reduce((sum, i) => sum + (Number(i.rating) || 0), 0) / reviewsData.length
+    )
+  }, [reviewsData])
+
+  const ratingBars = useMemo(() => {
+    const total = reviewsData.length || 1
+    return [5, 4, 3, 2, 1].map((star) => {
+      const count = reviewsData.filter((r) => Number(r.rating) === star).length
+      return { label: `${star}★`, width: `${Math.round((count / total) * 100)}%` }
+    })
+  }, [reviewsData])
+
+  const onChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const onSubmit = async (event) => {
+    event.preventDefault()
+    setStatusMessage('')
+    if (!currentUser) {
+      navigate('/login')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await api('/testimonials', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...formData,
+          rating: Number(formData.rating),
+        }),
+      })
+      setStatusMessage('Review submitted. It will be visible after admin approval.')
+      setFormData((prev) => ({ ...prev, city: '', rating: '5', review: '' }))
+    } catch (e) {
+      setStatusMessage(e.message || 'Unable to submit review')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <section className="relative overflow-hidden px-6 py-28 text-white">
@@ -142,13 +176,13 @@ function Testimonials() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
             {reviewsData.map((review) => (
               <article
-                key={review.id}
+                key={review._id || review.id}
                 className="rounded-[2.25rem] border border-emerald-100 bg-[#f8faf7] p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(15,23,42,0.12)]"
               >
                 <div className="mb-6 flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <HiOutlineStar
-                      key={`${review.id}-${index}`}
+                      key={`${review._id || review.id}-${index}`}
                       className={`h-5 w-5 ${index < review.rating ? 'text-amber-400' : 'text-slate-200'}`}
                     />
                   ))}
@@ -247,7 +281,7 @@ function Testimonials() {
           <div className="rounded-[2.5rem] bg-emerald-950 p-8 text-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] sm:p-10">
             <p className="text-sm font-bold uppercase tracking-[0.26em] text-emerald-100/80">Overall Rating</p>
             <div className="mt-6 flex items-end gap-4">
-              <span className="text-6xl font-bold">4.8</span>
+              <span className="text-6xl font-bold">{average.toFixed(1)}</span>
               <span className="pb-2 text-lg font-medium text-emerald-100/80">/ 5</span>
             </div>
             <div className="mt-5 flex items-center gap-1">
@@ -256,7 +290,7 @@ function Testimonials() {
               ))}
             </div>
             <p className="mt-5 text-sm leading-7 text-emerald-100/80">
-              Based on recent customer feedback collected from nursery visits, online orders, and repeat buyers.
+              Based on {reviewsData.length} approved customer reviews.
             </p>
           </div>
 
@@ -297,41 +331,54 @@ function Testimonials() {
             </p>
           </div>
 
-          <form className="grid grid-cols-1 gap-5 md:grid-cols-2" onSubmit={(event) => event.preventDefault()}>
+          <form className="grid grid-cols-1 gap-5 md:grid-cols-2" onSubmit={onSubmit}>
             <input
+              name="name"
               type="text"
               placeholder="Your Name"
+              value={formData.name}
+              onChange={onChange}
               className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
             />
             <input
+              name="email"
               type="email"
               placeholder="Your Email"
+              value={formData.email}
+              onChange={onChange}
               className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
             />
-            <select className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500">
-              <option>Choose Rating</option>
-              <option>5 Stars</option>
-              <option>4 Stars</option>
-              <option>3 Stars</option>
-              <option>2 Stars</option>
-              <option>1 Star</option>
+            <select name="rating" value={formData.rating} onChange={onChange} className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500">
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
             </select>
             <input
+              name="city"
               type="text"
               placeholder="City"
+              value={formData.city}
+              onChange={onChange}
               className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
             />
             <textarea
+              name="review"
               placeholder="Write your review"
               rows="6"
+              value={formData.review}
+              onChange={onChange}
               className="min-h-[180px] rounded-[1.75rem] border border-emerald-100 bg-white px-5 py-4 text-base text-slate-700 outline-none transition focus:border-emerald-500 md:col-span-2"
             />
+            {statusMessage ? <p className="md:col-span-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{statusMessage}</p> : null}
             <div className="md:col-span-2">
               <button
                 type="submit"
+                disabled={submitting}
                 className="inline-flex h-14 items-center justify-center rounded-full bg-emerald-950 px-8 text-sm font-bold text-white transition hover:bg-emerald-800"
               >
-                Submit Review
+                {submitting ? 'Submitting...' : currentUser ? 'Add Your Review' : 'Login & Add Review'}
               </button>
             </div>
           </form>

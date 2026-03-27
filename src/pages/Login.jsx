@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { HiOutlineBolt, HiOutlineLockClosed, HiOutlineShieldCheck } from 'react-icons/hi2'
 import { useNavigate } from 'react-router-dom'
+import { loginUser } from '../utils/userStore'
 
 const securityItems = [
   {
@@ -28,34 +29,14 @@ function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [statusMessage, setStatusMessage] = useState('')
 
-  // ✅ FIXED LOGIN FUNCTION
   const login = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setStatusMessage(data.message || "Login failed")
+      const result = await loginUser(formData.email.trim(), formData.password)
+      if (!result.ok) {
+        setStatusMessage(result.message || 'Login failed')
         return { ok: false }
       }
-
-      // ✅ Save token
-      if (data.token) {
-        localStorage.setItem("token", data.token)
-      }
-
-      return { ok: true }
-
+      return { ok: true, user: result.user }
     } catch (error) {
       console.error(error)
       setStatusMessage("Something went wrong")

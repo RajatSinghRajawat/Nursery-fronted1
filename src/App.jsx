@@ -5,7 +5,6 @@ import ScrollToTopButton from './components/ScrollToTopButton'
 import Home from './pages/Home'
 import About from './pages/About'
 import Cart from './pages/Cart'
-import Gallery from './pages/Gallery'
 import Testimonials from './pages/Testimonials'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
@@ -19,14 +18,15 @@ import GardeningTools from './pages/GardeningTools'
 import PotsPlanters from './pages/PotsPlanters'
 import SeedsBulbs from './pages/SeedsBulbs'
 import PlantCare from './pages/PlantCare'
+import SingleProduct from './pages/SingleProduct'
 import ProtectedRoute from './components/ProtectedRoute'
 
 const appRoutes = [
   { path: '/', element: <Home /> },
   { path: '/about', element: <About /> },
   { path: '/cart', element: <ProtectedRoute><Cart /></ProtectedRoute> },
-  { path: '/gallery', element: <Gallery /> },
   { path: '/products', element: <Products /> },
+  { path: '/product/:productId', element: <SingleProduct /> },
   { path: '/testimonials', element: <Testimonials /> },
   { path: '/contact', element: <Contact /> },
   { path: '/login', element: <Login /> },

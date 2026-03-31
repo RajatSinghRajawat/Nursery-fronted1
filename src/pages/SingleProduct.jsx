@@ -224,7 +224,7 @@ export default function SingleProduct() {
   }
 
   return (
-    <div className="bg-[#f6f8f7] px-4 py-8 sm:px-6">
+    <div className="bg-[#f6f8f7] overflow-x-hidden px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-5 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           <button type="button" onClick={() => navigate('/')} className="text-emerald-700">Home</button>
@@ -251,17 +251,22 @@ export default function SingleProduct() {
 
             <div
               className="order-1 relative overflow-hidden rounded-2xl border border-emerald-100 bg-[#f8faf7] sm:order-2"
-              onMouseEnter={() => setZooming(true)}
-              onMouseLeave={() => setZooming(false)}
-              onMouseMove={(e) => {
+              onPointerEnter={() => setZooming(true)}
+              onPointerLeave={() => setZooming(false)}
+              onPointerDown={() => setZooming(true)}
+              onPointerUp={() => setZooming(false)}
+              onPointerMove={(e) => {
+                if (!selectedImage) return
                 const r = e.currentTarget.getBoundingClientRect()
                 const x = ((e.clientX - r.left) / r.width) * 100
                 const y = ((e.clientY - r.top) / r.height) * 100
                 setZoomPos({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) })
               }}
+              onTouchStart={() => setZooming(true)}
+              onTouchEnd={() => setZooming(false)}
             >
               {selectedImage ? <img src={selectedImage} alt={product.name} className="h-[420px] w-full object-cover md:h-[520px]" /> : null}
-              <div className="pointer-events-none absolute right-3 top-3 flex items-center gap-1 rounded-full border border-white/35 bg-black/35 px-2.5 py-1 text-[11px] font-semibold text-white">
+              <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-white/35 bg-black/35 px-2.5 py-1 text-[11px] font-semibold text-white">
                 <HiOutlineMagnifyingGlassPlus className="h-3.5 w-3.5" />
                 Magnifier
               </div>
@@ -309,7 +314,8 @@ export default function SingleProduct() {
                 {highlights.slice(0, 6).map((h, i) => (
                   <div key={`${h}-${i}`} className="flex items-start gap-2 text-sm text-slate-700">
                     <HiOutlineCheckBadge className="mt-0.5 h-4.5 w-4.5 text-emerald-600" />
-                    <span className="break-words">{h}</span>
+                      {/* Break long continuous text so it never spills outside the container */}
+                      <span className="break-words break-all">{h}</span>
                   </div>
                 ))}
               </div>
@@ -515,7 +521,7 @@ export default function SingleProduct() {
         </section>
 
         {selectedImage && zooming ? (
-          <div className="pointer-events-none fixed bottom-4 right-4 z-40 hidden h-64 w-64 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-xl xl:block">
+          <div className="pointer-events-none fixed bottom-4 right-4 z-40 h-44 w-44 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-xl sm:h-56 sm:w-56 md:h-64 md:w-64">
             <img
               src={selectedImage}
               alt={product.name}

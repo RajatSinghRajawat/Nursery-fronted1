@@ -114,7 +114,8 @@ function Products() {
             {productCategories.map((category) => (
               <a
                 key={category.slug}
-                href={category.path}
+                // Use slug-based route so it always matches backend categories.
+                href={`/products/${encodeURIComponent(String(category.slug || ''))}`}
                 className="group overflow-hidden rounded-[2.25rem] border border-emerald-100 bg-[#f8faf7] shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(15,23,42,0.12)]"
               >
                 <div className="aspect-[4/3] overflow-hidden">

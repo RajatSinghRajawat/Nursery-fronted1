@@ -20,6 +20,8 @@ import SeedsBulbs from './pages/SeedsBulbs'
 import PlantCare from './pages/PlantCare'
 import SingleProduct from './pages/SingleProduct'
 import ProtectedRoute from './components/ProtectedRoute'
+import Orders from './pages/Orders'
+import ProductCategoryRoute from './pages/ProductCategoryRoute'
 
 const appRoutes = [
   { path: '/', element: <Home /> },
@@ -27,6 +29,7 @@ const appRoutes = [
   { path: '/cart', element: <ProtectedRoute><Cart /></ProtectedRoute> },
   { path: '/products', element: <Products /> },
   { path: '/product/:productId', element: <SingleProduct /> },
+  { path: '/orders', element: <ProtectedRoute><Orders /></ProtectedRoute> },
   { path: '/testimonials', element: <Testimonials /> },
   { path: '/contact', element: <Contact /> },
   { path: '/login', element: <Login /> },
@@ -39,6 +42,7 @@ const appRoutes = [
   { path: '/products/pots-planters', element: <PotsPlanters /> },
   { path: '/products/seeds-bulbs', element: <SeedsBulbs /> },
   { path: '/products/plant-care', element: <PlantCare /> },
+  { path: '/products/:categorySlug', element: <ProductCategoryRoute /> },
 ]
 
 function App() {

@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getCurrentUser, logoutUser } from '../utils/userStore'
 import { getCartCount } from '../utils/cart'
-import { productCategories } from '../data/productCategories'
+import { api } from '../utils/api'
+import { productCategories as staticProductCategories } from '../data/productCategories'
 
 const defaultOpenCategories = [0, 1, 2]
 
@@ -15,11 +16,35 @@ const badgeLetters = {
   Care: 'C',
 }
 
+function normalizeNavbarCategoriesFromApi(items) {
+  if (!Array.isArray(items)) return []
+  return items
+    .map((c) => ({
+      slug: c?.slug,
+      name: c?.name,
+      icon: c?.iconKey || c?.icon || '',
+      // Embedded subcategories from backend are in `subcategories`
+      subcategories: Array.isArray(c?.subcategories) ? c.subcategories : [],
+    }))
+    .filter((c) => c.slug && c.name)
+}
+
+function normalizeNavbarCategoriesFallback() {
+  return staticProductCategories.map((c) => ({
+    slug: c?.slug,
+    name: c?.name,
+    icon: c?.icon || '',
+    // Frontend static data uses `submenu`
+    subcategories: Array.isArray(c?.submenu) ? c.submenu : [],
+  }))
+}
+
 function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [currentUser, setCurrentUser] = useState(() => getCurrentUser())
   const [cartCount, setCartCount] = useState(0)
+  const [productCategories, setProductCategories] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isProductsOpen, setIsProductsOpen] = useState(false)
@@ -83,6 +108,26 @@ function Navbar() {
       window.removeEventListener('storage', syncCurrentUser)
     }
   }, [location.pathname])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        // Load top-level categories from backend.
+        // If backend doesn't return parent-root filtered correctly, we filter top-level client-side.
+        const data = await api('/categories?active=true')
+        if (cancelled) return
+        const normalized = normalizeNavbarCategoriesFromApi(data?.items || [])
+        const fallback = normalizeNavbarCategoriesFallback()
+        setProductCategories(normalized.length ? normalized : fallback)
+      } catch {
+        if (!cancelled) setProductCategories(normalizeNavbarCategoriesFallback())
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const routeTo = (path) => {
     setIsOpen(false)
@@ -212,6 +257,14 @@ function Navbar() {
                   animation: 'slideDownCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
               >
+                <div className="mb-6">
+                  <a
+                    href="/products"
+                    className="block w-full rounded-xl bg-emerald-50 px-4 py-3 text-center text-sm font-bold text-emerald-800 transition hover:bg-emerald-100"
+                  >
+                    All Products
+                  </a>
+                </div>
                 <div className="grid grid-cols-3 gap-x-12 gap-y-10">
                   {productCategories.map((category, idx) => (
                     <div key={category.slug} className="space-y-2" onMouseEnter={() => openCategoryOnHover(idx)}>
@@ -222,7 +275,7 @@ function Navbar() {
                       >
                         <span className="flex min-w-0 items-center gap-3">
                           <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-900">
-                            {badgeLetters[category.icon]}
+                            {(badgeLetters[category.icon] || String(category?.name || '').trim().charAt(0).toUpperCase()) || '?'}
                           </span>
                           <span>{category.name}</span>
                         </span>
@@ -233,18 +286,25 @@ function Navbar() {
 
                       {openCategories.includes(idx) && (
                         <div className="space-y-1">
-                          <a href={category.path} className="block rounded-md bg-emerald-50 px-2 py-2 text-sm font-semibold text-emerald-700 transition-all duration-200 hover:bg-emerald-100">
+                          <a
+                            href={`/products/${encodeURIComponent(String(category.slug || ''))}`}
+                            className="block rounded-md bg-emerald-50 px-2 py-2 text-sm font-semibold text-emerald-700 transition-all duration-200 hover:bg-emerald-100"
+                          >
                             View all {category.name}
                           </a>
-                          {category.submenu.map((subItem) => (
+                          {(Array.isArray(category.subcategories) ? category.subcategories : []).map((subItem) => {
+                            const subKey = subItem?.Id || subItem?.id || subItem?.name || ''
+                            const subHash = subItem?.Id || subItem?.id || subItem?.name || ''
+                            return (
                             <a
-                              key={subItem.id}
-                              href={`${category.path}#${subItem.id}`}
+                              key={subKey}
+                              href={`/products/${encodeURIComponent(String(category.slug || ''))}#${encodeURIComponent(String(subHash))}`}
                               className="block rounded-md px-2 py-1.5 text-sm text-gray-600 transition-all duration-200 hover:bg-green-50 hover:text-green-600"
                             >
                               {subItem.name}
                             </a>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>
@@ -303,6 +363,13 @@ function Navbar() {
                     {(currentUser.fullName || 'U').slice(0, 1).toUpperCase()}
                   </span>
                   {currentUser.fullName}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => routeTo('/orders')}
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-50"
+                >
+                  Orders
                 </button>
                 <button type="button" onClick={handleLogout} className="border-0 bg-transparent px-4 py-2 text-sm font-semibold text-gray-700 transition-all hover:text-green-600">
                   Logout
@@ -378,7 +445,13 @@ function Navbar() {
               </button>
 
               {isProductsOpen && (
-                <div className="mt-2 space-y-3 pl-4">
+            <div className="mt-2 space-y-3 pl-4">
+              <a
+                href="/products"
+                className="block rounded-lg bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+              >
+                All Products
+              </a>
                   {productCategories.map((category, idx) => (
                     <div key={category.slug} className="space-y-1">
                       <button
@@ -396,11 +469,18 @@ function Navbar() {
 
                       {openCategories.includes(idx) && (
                         <div className="space-y-1 pl-6">
-                          <a href={category.path} className="block px-3 py-1.5 text-sm font-semibold text-green-700 hover:text-green-800">
+                          <a
+                            href={`/products/${encodeURIComponent(String(category.slug || ''))}`}
+                            className="block px-3 py-1.5 text-sm font-semibold text-green-700 hover:text-green-800"
+                          >
                             View all {category.name}
                           </a>
-                          {category.submenu.map((subItem) => (
-                            <a key={subItem.id} href={`${category.path}#${subItem.id}`} className="block px-3 py-1.5 text-sm text-gray-600 hover:text-green-600">
+                          {(Array.isArray(category.subcategories) ? category.subcategories : []).map((subItem) => (
+                            <a
+                              key={subItem.Id || subItem.name}
+                              href={`/products/${encodeURIComponent(String(category.slug || ''))}#${encodeURIComponent(String(subItem.Id || subItem.name || ''))}`}
+                              className="block px-3 py-1.5 text-sm text-gray-600 hover:text-green-600"
+                            >
                               {subItem.name}
                             </a>
                           ))}
@@ -423,6 +503,9 @@ function Navbar() {
                 <>
                   <button type="button" onClick={() => routeTo('/profile')} className="w-full rounded-lg border-0 bg-emerald-50 px-3 py-2.5 text-center font-semibold text-emerald-900 transition-all duration-200 hover:bg-emerald-100">
                     {currentUser.fullName}
+                  </button>
+                  <button type="button" onClick={() => routeTo('/orders')} className="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5 text-center font-semibold text-emerald-950 transition-all duration-200 hover:bg-emerald-50">
+                    Orders
                   </button>
                   <button type="button" onClick={handleLogout} className="w-full rounded-lg border-0 bg-transparent px-3 py-2.5 text-center text-gray-700 transition-all duration-200 hover:bg-green-50 hover:text-green-600">
                     Logout

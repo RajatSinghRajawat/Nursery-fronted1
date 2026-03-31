@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { HiOutlineArrowRight, HiOutlineCheckBadge, HiOutlineSparkles } from 'react-icons/hi2'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { addCartItemByProductId } from '../utils/cart'
 import { getCurrentUser } from '../utils/userStore'
 import { api } from '../utils/api'
@@ -16,6 +16,7 @@ const iconBadgeClass = {
 
 function ProductCategoryPage({ category }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [apiProducts, setApiProducts] = useState([])
   const [catData, setCatData] = useState(null)
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState('')
@@ -44,19 +45,48 @@ function ProductCategoryPage({ category }) {
     }
   }, [category.slug])
 
+  // Keep product filtering in sync with navbar category/subcategory clicks.
+  // Navbar uses URL hash (e.g. #low-light). Hash may represent Id or name.
+  useEffect(() => {
+    const rawHash = String(location.hash || '').replace(/^#/, '').trim()
+    if (!rawHash) {
+      setSelectedSubcategoryName('')
+      return
+    }
+    setSelectedSubcategoryName(decodeURIComponent(rawHash))
+  }, [location.hash])
+
   useEffect(() => {
     let cancelled = false
     if (!catData?._id) return
 
     ;(async () => {
       try {
-        const q = new URLSearchParams({
-          limit: '24',
-          active: 'true',
-          categoryId: String(catData._id),
-        })
-        const data = await api(`/products?${q}`)
-        if (!cancelled) setApiProducts(data.items || [])
+        // Fetch ALL products for this category (backend caps `limit` to 100).
+        // We page through until we've got everything, then apply subcategory filtering client-side.
+        const pageSize = '100'
+        let page = 1
+        const all = []
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const q = new URLSearchParams({
+            limit: pageSize,
+            page: String(page),
+            active: 'true',
+            categoryId: String(catData._id),
+          })
+          const data = await api(`/products?${q}`)
+          const items = data?.items || []
+          all.push(...items)
+
+          const total = Number(data?.total || all.length)
+          if (all.length >= total) break
+          if (items.length === 0) break
+          page += 1
+        }
+
+        if (!cancelled) setApiProducts(all)
       } catch {
         if (!cancelled) setApiProducts([])
       }
@@ -74,8 +104,25 @@ function ProductCategoryPage({ category }) {
 
   const filteredProducts = useMemo(() => {
     if (!selectedSubcategoryName) return apiProducts
-    const target = String(selectedSubcategoryName).toLowerCase().trim()
-    if (!target) return apiProducts
+    const selectedNorm = String(selectedSubcategoryName).toLowerCase().trim()
+    if (!selectedNorm) return apiProducts
+
+    // Backend products may store `subcategoriesText` using either subcategory Id or subcategory name.
+    // Build matching candidates so filtering works no matter which format the backend used.
+    const candidates = new Set([selectedNorm])
+    const match = subcategories.find((s) => {
+      const idNorm = String(s?.Id || s?.id || '').toLowerCase().trim()
+      const nameNorm = String(s?.name || '').toLowerCase().trim()
+      return idNorm === selectedNorm || nameNorm === selectedNorm
+    })
+    // If hash doesn't correspond to any known subcategory, show the full category list.
+    // This prevents "empty page" when hash is stale/incorrect.
+    if (!match) return apiProducts
+
+    if (match.Id) candidates.add(String(match.Id).toLowerCase().trim())
+    if (match.id) candidates.add(String(match.id).toLowerCase().trim())
+    if (match.name) candidates.add(String(match.name).toLowerCase().trim())
+    const candidateList = Array.from(candidates).filter(Boolean)
 
     return apiProducts.filter((p) => {
       const raw = p?.subcategoriesText
@@ -86,9 +133,9 @@ function ProductCategoryPage({ category }) {
           ? raw.split(/\r?\n|,/g)
           : []
       const normalized = list.map((n) => String(n).trim().toLowerCase())
-      return normalized.includes(target)
+      return candidateList.some((c) => normalized.includes(c))
     })
-  }, [apiProducts, selectedSubcategoryName])
+  }, [apiProducts, selectedSubcategoryName, subcategories])
 
   const heroImage = catData?.coverImages?.[0] || catData?.coverImage || category?.heroImage
 
@@ -213,13 +260,14 @@ function ProductCategoryPage({ category }) {
               {subcategories.map((item, idx) => (
                 <a
                   key={item._id || item.Id || item.name || idx}
-                  href={`#${item.Id || item.name || idx}`}
+                  href={`#${item.Id || item.id || item.name || idx}`}
                   className="flex items-center justify-between rounded-[1.25rem] border border-emerald-100 bg-white px-5 py-4 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
                   onClick={(e) => {
                     if (!item?.name) return
                     e.preventDefault()
-                    setSelectedSubcategoryName(String(item.name))
-                    const elId = `${item.Id || item.name || idx}`
+                    // Prefer Id when available so hash-based matching stays consistent.
+                    setSelectedSubcategoryName(String(item.Id || item.id || item.name))
+                    const elId = `${item.Id || item.id || item.name || idx}`
                     window.requestAnimationFrame(() =>
                       document.getElementById(elId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                     )
@@ -249,8 +297,8 @@ function ProductCategoryPage({ category }) {
           <div className="grid gap-8 md:grid-cols-2">
             {subcategories.map((item, index) => (
               <article
-                key={item._id || item.Id || item.name || index}
-                id={`${item.Id || item.name || index}`}
+                key={item._id || item.Id || item.id || item.name || index}
+                id={`${item.Id || item.id || item.name || index}`}
                 className="rounded-[2rem] border border-emerald-100 bg-white p-8 shadow-sm"
               >
                 <div className="flex items-center gap-4">

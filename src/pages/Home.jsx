@@ -655,11 +655,11 @@ function Home() {
                       <HiOutlineHeart className="w-5 h-5" />
                     </button>
                   </div>
-                  {product.tag && (
+                  {/* {product.tag && (
                     <div className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
                       {product.tag}
                     </div>
-                  )}
+                  )} */}
                   {/* Action Bar on hover */}
                   <div className="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                     <button type="button" onClick={() => handleAddToCart(product)} className="w-full py-4 bg-emerald-950 text-white rounded-2xl font-bold text-sm shadow-2xl flex items-center justify-center gap-2 hover:bg-emerald-800">
@@ -669,7 +669,7 @@ function Home() {
                   </div>
                 </div>
 
-                <div className="px-2">
+                {/* <div className="px-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{product.category}</span>
                     <div className="flex items-center gap-1">
@@ -701,7 +701,7 @@ function Home() {
                       Quick View
                     </button>
                   </div>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>

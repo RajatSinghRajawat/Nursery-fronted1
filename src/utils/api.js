@@ -1,5 +1,5 @@
 const API_BASE =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000/api'
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://greenbeli.in/api'
 
 const TOKEN_KEY = 'nursery_token'
 

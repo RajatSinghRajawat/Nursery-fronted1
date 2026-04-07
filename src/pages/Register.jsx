@@ -69,7 +69,7 @@ function Register() {
         redirect: "follow"
       };
 
-      const response = await fetch("http://localhost:5000/api/register", requestOptions);
+      const response = await fetch("https://greenbeli.in/api/register", requestOptions);
       const result = await response.text();   // ya response.json() agar JSON return kar raha ho
 
       return { ok: response.ok, message: result };

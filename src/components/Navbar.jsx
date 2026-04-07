@@ -4,6 +4,7 @@ import { getCurrentUser, logoutUser } from '../utils/userStore'
 import { getCartCount } from '../utils/cart'
 import { api } from '../utils/api'
 import { productCategories as staticProductCategories } from '../data/productCategories'
+import logo from './logo.png';
 
 const defaultOpenCategories = [0, 1, 2]
 
@@ -213,13 +214,8 @@ function Navbar() {
     <header className="fixed left-0 top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <button type="button" onClick={() => routeTo('/')} className="group flex items-center gap-2 border-0 bg-transparent p-0">
-          <span className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M4 14c0-5 4-9 9-9 0 5-4 9-9 9Z" />
-              <path d="M9 20c.5-4 3-7 7-9" />
-            </svg>
-          </span>
-          <span className="text-xl font-bold text-gray-900 transition-colors group-hover:text-green-600">Nurser</span>
+          <img src={logo} alt="GreenBeli Gardeniya" className="h-20 w-22 rounded-pill" />
+          {/* <span className="hidden text-lg font-bold text-green-700 sm:inline-block">GreenBeli Gardeniya</span> */}
         </button>
 
         <div className="hidden items-center gap-8 md:flex">

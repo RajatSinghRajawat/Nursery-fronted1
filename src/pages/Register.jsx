@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { HiOutlineHeart, HiOutlineShoppingBag, HiOutlineTicket, HiOutlineTruck } from 'react-icons/hi2'
-import { useNavigate } from 'react-router-dom'
-// import { registerUser } from '../utils/userStore'
+import { useState } from 'react';
+import { HiOutlineHeart, HiOutlineShoppingBag, HiOutlineTicket, HiOutlineTruck } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
 
 const benefitItems = [
   {
@@ -24,10 +23,10 @@ const benefitItems = [
     title: 'Get special offers',
     icon: HiOutlineTicket,
   },
-]
+];
 
 function Register() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -37,47 +36,77 @@ function Register() {
     address: '',
     city: '',
     agreed: false,
-  })
-  const [statusMessage, setStatusMessage] = useState('')
+  });
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target
+    const { name, value, type, checked } = event.target;
     setFormData((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
-    }))
-  }
+    }));
+  };
+
+  const registerUser = async (userData) => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      const raw = JSON.stringify({
+        name: userData.fullName,
+        email: userData.email,
+        phone: userData.phone,
+        password: userData.password,
+        address: userData.address,
+        city: userData.city,
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+      };
+
+      const response = await fetch("http://localhost:5000/api/register", requestOptions);
+      const result = await response.text();   // ya response.json() agar JSON return kar raha ho
+
+      return { ok: response.ok, message: result };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, message: 'Something went wrong. Please try again.' };
+    }
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      setStatusMessage('Password and confirm password must match.')
-      return
+      setStatusMessage('Password and confirm password must match.');
+      return;
     }
 
     if (!formData.agreed) {
-      setStatusMessage('Please accept the Terms & Conditions to continue.')
-      return
+      setStatusMessage('Please accept the Terms & Conditions to continue.');
+      return;
     }
 
-    // const result = await registerUser({
-    //   fullName: formData.fullName,
-    //   email: formData.email,
-    //   phone: formData.phone,
-    //   password: formData.password,
-    //   address: formData.address,
-    //   city: formData.city,
-    // })
+    setIsLoading(true);
+    setStatusMessage('');
+
+    const result = await registerUser(formData);
+
+    setIsLoading(false);
 
     if (!result.ok) {
-      setStatusMessage(result.message)
-      return
+      setStatusMessage(result.message || 'Registration failed. Please try again.');
+      return;
     }
 
-    setStatusMessage('')
-    navigate('/profile')
-  }
+    setStatusMessage('');
+    navigate('/profile');   // ya jahan bhi jaana hai successful registration ke baad
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -87,6 +116,7 @@ function Register() {
         <div className="absolute bottom-0 left-0 h-80 w-80 rounded-full bg-lime-100/70 blur-[120px]" />
 
         <div className="relative mx-auto grid max-w-[1400px] gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-stretch">
+          {/* Left Side - Benefits Section (bilkul same rakha) */}
           <div className="relative overflow-hidden rounded-[2.75rem] bg-emerald-950 text-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
             <img
               src="https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1400&auto=format&fit=crop"
@@ -109,8 +139,7 @@ function Register() {
 
               <div className="mt-10 grid gap-5 sm:grid-cols-2">
                 {benefitItems.map((item) => {
-                  const Icon = item.icon
-
+                  const Icon = item.icon;
                   return (
                     <article key={item.id} className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 backdrop-blur-md">
                       <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[1rem] bg-white/12 text-white">
@@ -118,12 +147,13 @@ function Register() {
                       </div>
                       <h2 className="text-lg font-bold">{item.title}</h2>
                     </article>
-                  )
+                  );
                 })}
               </div>
             </div>
           </div>
 
+          {/* Right Side - Form (bilkul same) */}
           <div className="rounded-[2.75rem] bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
             <div className="mb-8">
               <p className="text-sm font-bold uppercase tracking-[0.24em] text-emerald-700">Register</p>
@@ -140,6 +170,7 @@ function Register() {
                 value={formData.fullName}
                 onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-[#f8faf7] px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500 md:col-span-2"
+                required
               />
               <input
                 name="email"
@@ -148,6 +179,7 @@ function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-[#f8faf7] px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
+                required
               />
               <input
                 name="phone"
@@ -164,6 +196,7 @@ function Register() {
                 value={formData.password}
                 onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-[#f8faf7] px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
+                required
               />
               <input
                 name="confirmPassword"
@@ -172,6 +205,7 @@ function Register() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-[#f8faf7] px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
+                required
               />
               <input
                 name="address"
@@ -191,22 +225,30 @@ function Register() {
               />
 
               <label className="flex items-start gap-3 rounded-[1.5rem] border border-emerald-100 bg-[#f8faf7] px-5 py-4 text-sm leading-7 text-slate-600 md:col-span-2">
-                <input name="agreed" type="checkbox" checked={formData.agreed} onChange={handleChange} className="mt-1 h-4 w-4 rounded border-emerald-200 text-emerald-700" />
+                <input 
+                  name="agreed" 
+                  type="checkbox" 
+                  checked={formData.agreed} 
+                  onChange={handleChange} 
+                  className="mt-1 h-4 w-4 rounded border-emerald-200 text-emerald-700" 
+                  required 
+                />
                 <span>I agree to the Terms &amp; Conditions and confirm that my account details are correct.</span>
               </label>
 
-              {statusMessage ? (
+              {statusMessage && (
                 <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600 md:col-span-2">
                   {statusMessage}
                 </p>
-              ) : null}
+              )}
 
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-emerald-950 px-8 text-sm font-bold text-white transition hover:bg-emerald-800"
+                  disabled={isLoading}
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-emerald-950 px-8 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-70"
                 >
-                  Create Account
+                  {isLoading ? 'Creating Account...' : 'Create Account'}
                 </button>
               </div>
             </form>
@@ -214,7 +256,11 @@ function Register() {
             <div className="mt-8 rounded-[2rem] bg-emerald-50 px-6 py-5 text-center">
               <p className="text-sm text-slate-600">
                 Already have an account?
-                <button type="button" onClick={() => navigate('/login')} className="ml-2 border-0 bg-transparent font-bold text-emerald-700 transition hover:text-emerald-900">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/login')} 
+                  className="ml-2 border-0 bg-transparent font-bold text-emerald-700 transition hover:text-emerald-900"
+                >
                   Login Here
                 </button>
               </p>
@@ -223,7 +269,7 @@ function Register() {
         </div>
       </section>
     </div>
-  )
+  );
 }
 
-export default Register
+export default Register;

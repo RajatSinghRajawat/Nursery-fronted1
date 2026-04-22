@@ -129,6 +129,9 @@ function About() {
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/85 sm:text-lg">
               Our nursery brings together healthy plants, organic care methods, and practical gardening support so homes and gardens feel greener, calmer, and more alive.
             </p>
+             <p className="mt-6 max-w-2xl text-base leading-8 text-white/85 sm:text-lg">
+              Our nursery brings together healthy plants, organic care methods, and practical gardening support so homes and gardens feel greener, calmer, and more alive.
+            </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium">100+ plant varieties</span>
               <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium">Trusted growing methods</span>

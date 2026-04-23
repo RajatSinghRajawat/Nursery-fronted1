@@ -5,7 +5,7 @@ import { FiArrowRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../utils/userStore'
 import { addCartItemByProductId } from '../utils/cart'
-import { api } from '../utils/api'
+import { api, IMAGE_BASE } from '../utils/api'
 
 function mapApiToTopPick(p) {
   const price = Number(p.price || 0)
@@ -15,12 +15,30 @@ function mapApiToTopPick(p) {
       ? Math.max(0, price - (price * disc) / 100)
       : Math.max(0, price - disc)
   const mrp = Number(p.mrp || 0)
+  
+  let rawImg = p.mainImage || (Array.isArray(p.image) ? p.image[0] : p.image) || ''
+  
+  // 1. Clean legacy localhost:5000 links
+  if (typeof rawImg === 'string' && rawImg.includes('localhost:5000')) {
+    rawImg = rawImg.split('/uploads/').pop();
+  }
+
+  // 2. Decide Base URL (Smart detection)
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const effectiveBase = (isLocal && !IMAGE_BASE.includes('localhost')) 
+    ? 'http://localhost:5008/uploads' 
+    : IMAGE_BASE;
+
+  const imageUrl = (rawImg && !rawImg.startsWith('http')) 
+    ? `${effectiveBase}/${rawImg}` 
+    : rawImg
+
   return {
     _id: p._id,
     id: p._id,
     name: p.name,
     subtitle: p.shortDescription ? String(p.shortDescription).slice(0, 90) : '',
-    image: p.mainImage || p.image?.[0] || '',
+    image: imageUrl,
     category: p.categoryId?.name || 'Plant',
     rating:
       p.averageRating > 0
@@ -645,7 +663,7 @@ function Home() {
               <div key={product._id || product.id} className="group">
                 <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-emerald-50 mb-6">
                   <img
-                    src={product.image}
+                    src={product.image || null}
                     alt={product.name}
                     onClick={() => openProduct(product)}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -781,7 +799,7 @@ function Home() {
                 <div className="relative overflow-hidden rounded-[2rem] bg-[#f7fbf4] p-3 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_32px_65px_rgba(15,23,42,0.12)]">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem]">
                     <img
-                      src={plant.image}
+                      src={plant.image || null}
                       alt={plant.name}
                       onClick={() => openProduct(plant)}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

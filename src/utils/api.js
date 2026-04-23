@@ -1,6 +1,8 @@
 const API_BASE =
   import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://greenbeli.in/api'
 
+export const IMAGE_BASE = API_BASE.replace('/api', '') + '/uploads'
+
 const TOKEN_KEY = 'nursery_token'
 
 export function getToken() {
@@ -27,7 +29,6 @@ export async function api(path, options = {}) {
   const res = await fetch(url, {
     ...options,
     headers,
-    credentials: 'include',
   })
   const text = await res.text()
   let data

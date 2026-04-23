@@ -61,6 +61,39 @@ const faqItems = [
 
 function Contact() {
   const [openFaq, setOpenFaq] = useState(1)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    inquiryType: 'General Question',
+    subject: '',
+    message: '',
+  })
+  const [status, setStatus] = useState({ loading: false, success: false, error: '' })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus({ loading: true, success: false, error: '' })
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5008/api'}/leads/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to send message')
+      
+      setStatus({ loading: false, success: true, error: '' })
+      setFormData({ name: '', email: '', phone: '', inquiryType: 'General Question', subject: '', message: '' })
+    } catch (err) {
+      setStatus({ loading: false, success: false, error: err.message })
+    }
+  }
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -149,44 +182,73 @@ function Contact() {
               </h2>
             </div>
 
-            <form className="grid grid-cols-1 gap-5 md:grid-cols-2" onSubmit={(event) => event.preventDefault()}>
+            <form className="grid grid-cols-1 gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
               <input
+                name="name"
                 type="text"
+                required
                 placeholder="Name"
+                value={formData.name}
+                onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
               />
               <input
+                name="email"
                 type="email"
+                required
                 placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
               />
               <input
+                name="phone"
                 type="tel"
+                required
                 placeholder="Phone"
+                value={formData.phone}
+                onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
               />
-              <select className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500">
+              <select 
+                name="inquiryType"
+                value={formData.inquiryType}
+                onChange={handleChange}
+                className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500"
+              >
                 <option>General Question</option>
                 <option>Plant Inquiry</option>
                 <option>Delivery Question</option>
                 <option>Bulk Order</option>
               </select>
               <input
+                name="subject"
                 type="text"
                 placeholder="Subject"
+                value={formData.subject}
+                onChange={handleChange}
                 className="h-14 rounded-2xl border border-emerald-100 bg-white px-5 text-base text-slate-700 outline-none transition focus:border-emerald-500 md:col-span-2"
               />
               <textarea
+                name="message"
+                required
                 placeholder="Message"
                 rows="6"
+                value={formData.message}
+                onChange={handleChange}
                 className="min-h-[180px] rounded-[1.75rem] border border-emerald-100 bg-white px-5 py-4 text-base text-slate-700 outline-none transition focus:border-emerald-500 md:col-span-2"
               />
+              
+              {status.error && <p className="text-red-500 text-sm font-bold md:col-span-2">{status.error}</p>}
+              {status.success && <p className="text-emerald-600 text-sm font-bold md:col-span-2">Thank you! Your inquiry has been sent.</p>}
+
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="inline-flex h-14 items-center justify-center rounded-full bg-emerald-950 px-8 text-sm font-bold text-white transition hover:bg-emerald-800"
+                  disabled={status.loading}
+                  className="inline-flex h-14 items-center justify-center rounded-full bg-emerald-950 px-8 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-50"
                 >
-                  Send Message
+                  {status.loading ? 'Sending...' : 'Send Message'}
                 </button>
               </div>
             </form>

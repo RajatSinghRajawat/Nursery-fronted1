@@ -3,7 +3,7 @@ import { HiOutlineArrowRight } from 'react-icons/hi2'
 import { useNavigate } from 'react-router-dom'
 import { productCategories } from '../data/productCategories'
 import { addCartItemByProductId } from '../utils/cart'
-import { api } from '../utils/api'
+import { api, IMAGE_BASE } from '../utils/api'
 import { getCurrentUser } from '../utils/userStore'
 
 const badgeLetters = {
@@ -44,10 +44,17 @@ function Products() {
       const price = Number(p.price || 0)
       const disc = Number(p.discount || 0)
       const unit = p.discountType === 'percent' ? Math.max(0, price - (price * disc) / 100) : Math.max(0, price - disc)
+      
+      let imgName = (p.mainImage || p.image?.[0] || '').replace(/.*localhost:5000\/uploads\//, '');
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const effectiveBase = (isLocal && !IMAGE_BASE.includes('localhost')) 
+        ? 'http://localhost:5008/uploads' 
+        : IMAGE_BASE;
+
       return {
         _id: p._id,
         name: p.name,
-        image: p.mainImage || p.image?.[0] || '',
+        image: imgName.startsWith('http') ? imgName : `${effectiveBase}/${imgName}`,
         category: p.categoryId?.name || 'Plant',
         price: unit,
         mrp: Number(p.mrp || 0),
@@ -164,7 +171,7 @@ function Products() {
             {productList.map((product) => (
               <article key={product._id} className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                 <div className="aspect-[4/4.5] overflow-hidden">
-                  <img src={`https://greenbeli.in/uploads/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
+                  <img src={`${IMAGE_BASE}/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">{product.category}</p>

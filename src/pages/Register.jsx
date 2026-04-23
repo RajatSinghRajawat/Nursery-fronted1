@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { HiOutlineHeart, HiOutlineShoppingBag, HiOutlineTicket, HiOutlineTruck } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
+import { registerUser } from '../utils/userStore';
 
 const benefitItems = [
+// ... (benefitItems stay same)
   {
     id: 1,
     title: 'Track your plant orders',
@@ -48,37 +50,6 @@ function Register() {
     }));
   };
 
-  const registerUser = async (userData) => {
-    try {
-      const myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-
-      const raw = JSON.stringify({
-        name: userData.fullName,
-        email: userData.email,
-        phone: userData.phone,
-        password: userData.password,
-        address: userData.address,
-        city: userData.city,
-      });
-
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow"
-      };
-
-      const response = await fetch("https://greenbeli.in/api/register", requestOptions);
-      const result = await response.text();   // ya response.json() agar JSON return kar raha ho
-
-      return { ok: response.ok, message: result };
-    } catch (error) {
-      console.error(error);
-      return { ok: false, message: 'Something went wrong. Please try again.' };
-    }
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -97,6 +68,7 @@ function Register() {
 
     const result = await registerUser(formData);
 
+    setIsLoading(true); // Keep loading state until navigation if success
     setIsLoading(false);
 
     if (!result.ok) {

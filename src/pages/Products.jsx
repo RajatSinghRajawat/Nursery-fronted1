@@ -176,11 +176,7 @@ function Products() {
               
               <article key={product._id} className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                 <div className="aspect-[4/4.5] overflow-hidden">
-<<<<<<< HEAD
                   <img src={`${baseurl}/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
-=======
-                  <img src={`${IMAGE_BASE}/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
->>>>>>> 30103f097236bf844714be206959ef65f2af2a34
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">{product.category}</p>

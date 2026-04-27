@@ -16,6 +16,7 @@ const badgeLetters = {
 }
 
 function Products() {
+  const baseurl = 'http://localhost:5008'
   const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -27,6 +28,7 @@ function Products() {
     ;(async () => {
       try {
         const data = await api('/products?limit=60&active=true')
+        console.log('Fetched products:', data.items)
         if (!cancelled) setItems(data.items || [])
       } catch (e) {
         if (!cancelled) setError(e.message || 'Failed to load products')
@@ -55,6 +57,8 @@ function Products() {
       }
     })
   }, [items])
+
+  console.log( 'and productList:', productList.image)
 
   const openProduct = (id) => {
     if (!id) return
@@ -162,9 +166,10 @@ function Products() {
 
           <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
             {productList.map((product) => (
+              
               <article key={product._id} className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                 <div className="aspect-[4/4.5] overflow-hidden">
-                  <img src={`https://greenbeli.in/uploads/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
+                  <img src={`${baseurl}/uploads/${product.image[0]}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">{product.category}</p>

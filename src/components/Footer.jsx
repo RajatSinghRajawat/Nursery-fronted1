@@ -94,7 +94,7 @@ function Footer() {
                   </span>
                   <div>
                     <p className="font-semibold text-white">Address</p>
-                    <p className="mt-1">Jaipur, Rajasthan</p>
+                    <p className="mt-1">Khasra No. 74, Rewari Highway Road, near Gyansagar School, Kotkasim, Alampur, Rajasthan 301702</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 text-sm text-emerald-100/75">
@@ -103,7 +103,7 @@ function Footer() {
                   </span>
                   <div>
                     <p className="font-semibold text-white">Phone</p>
-                    <p className="mt-1">+91 98765 43210</p>
+                    <p className="mt-1">+91 9950711475</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 text-sm text-emerald-100/75">
@@ -112,7 +112,7 @@ function Footer() {
                   </span>
                   <div>
                     <p className="font-semibold text-white">Email</p>
-                    <p className="mt-1">info@nursery.com</p>
+                    <p className="mt-1">greenbeligardeniya@gmail.com  </p>
                   </div>
                 </div>
               </div>

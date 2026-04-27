@@ -1,5 +1,5 @@
-const API_BASE =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://greenbeli.in/api'
+// const API_BASE ='https://greenbeli.in/api'
+const API_BASE ='http://localhost:5008/api'
 
 const TOKEN_KEY = 'nursery_token'
 

@@ -28,6 +28,8 @@ function mapUser(u) {
     name,
     email: u.email,
     phone: u.phone,
+    address: u.address,
+    city: u.city || u.address?.city,
   }
 }
 
@@ -43,6 +45,9 @@ export async function registerUser(payload) {
         name: fullName,
         email,
         password,
+        phone,
+        address,
+        city,
       }),
     })
     setToken(res.token)

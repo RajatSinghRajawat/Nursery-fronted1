@@ -12,8 +12,24 @@ import {
 } from 'react-icons/hi2'
 import { useNavigate, useParams } from 'react-router-dom'
 import { addCartItemByProductId } from '../utils/cart'
-import { api } from '../utils/api'
+import { api, IMAGE_BASE } from '../utils/api'
 import { getCurrentUser } from '../utils/userStore'
+
+function getFullImageUrl(url) {
+  if (!url) return ''
+  let cleaned = url
+  if (typeof cleaned === 'string' && cleaned.includes('localhost:5000')) {
+    cleaned = cleaned.split('/uploads/').pop()
+  }
+  if (cleaned.startsWith('http') || cleaned.startsWith('blob:')) return cleaned
+  
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const effectiveBase = (isLocal && !IMAGE_BASE.includes('localhost')) 
+    ? 'http://localhost:5008/uploads' 
+    : IMAGE_BASE;
+
+  return `${effectiveBase}/${cleaned}`
+}
 
 const keySpecs = [
   ['Plant Type', 'plantType'],
@@ -60,7 +76,7 @@ export default function SingleProduct() {
         if (cancelled) return
         setProduct(data)
         setQuantity(Math.max(1, Number(data?.minOrderQty || 1)))
-        setSelectedImage(data?.mainImage || data?.image?.[0] || data?.additionalImages?.[0] || '')
+        setSelectedImage(getFullImageUrl(data?.mainImage || data?.image?.[0] || data?.additionalImages?.[0] || ''))
       } catch (e) {
         if (!cancelled) setError(e.message || 'Unable to load product')
       } finally {
@@ -107,7 +123,7 @@ export default function SingleProduct() {
     ;(product?.additionalImages || []).forEach(add)
     ;(product?.lifestyleImages || []).forEach(add)
     ;(product?.image || []).forEach(add)
-    return out
+    return out.map(getFullImageUrl)
   }, [product])
 
   const unitPrice = useMemo(() => priceOf(product), [product])
@@ -484,9 +500,10 @@ export default function SingleProduct() {
             {related.slice(0, 10).map((item) => {
               const p = priceOf(item)
               const m = Number(item?.mrp || 0)
+              const imageUrl = (item.mainImage || item.image?.[0] || '').replace(/.*localhost:5000\/uploads\//, '')
               return (
                 <article key={item._id} className="w-[240px] shrink-0 overflow-hidden rounded-xl border border-emerald-100 bg-[#f8faf7]">
-                  <img src={item.mainImage || item.image?.[0] || ''} alt={item.name} className="h-40 w-full cursor-pointer object-cover" onClick={() => navigate(`/product/${item._id}`)} />
+                  <img src={getFullImageUrl(imageUrl)} alt={item.name} className="h-40 w-full cursor-pointer object-cover" onClick={() => navigate(`/product/${item._id}`)} />
                   <div className="p-3">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">{item.categoryId?.name || 'Plant'}</p>
                     <h3 className="mt-1 line-clamp-2 cursor-pointer text-sm font-bold text-slate-900" onClick={() => navigate(`/product/${item._id}`)}>{item.name}</h3>

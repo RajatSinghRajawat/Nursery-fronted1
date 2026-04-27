@@ -25,17 +25,17 @@ function Products() {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    ;(async () => {
-      try {
-        const data = await api('/products?limit=60&active=true')
-        console.log('Fetched products:', data.items)
-        if (!cancelled) setItems(data.items || [])
-      } catch (e) {
-        if (!cancelled) setError(e.message || 'Failed to load products')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          const data = await api('/products?limit=60&active=true')
+          console.log('Fetched products:', data.items)
+          if (!cancelled) setItems(data.items || [])
+        } catch (e) {
+          if (!cancelled) setError(e.message || 'Failed to load products')
+        } finally {
+          if (!cancelled) setLoading(false)
+        }
+      })()
     return () => {
       cancelled = true
     }
@@ -46,11 +46,11 @@ function Products() {
       const price = Number(p.price || 0)
       const disc = Number(p.discount || 0)
       const unit = p.discountType === 'percent' ? Math.max(0, price - (price * disc) / 100) : Math.max(0, price - disc)
-      
+
       let imgName = (p.mainImage || p.image?.[0] || '').replace(/.*localhost:5000\/uploads\//, '');
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const effectiveBase = (isLocal && !IMAGE_BASE.includes('localhost')) 
-        ? 'http://localhost:5008/uploads' 
+      const effectiveBase = (isLocal && !IMAGE_BASE.includes('localhost'))
+        ? 'http://localhost:5008/uploads'
         : IMAGE_BASE;
 
       return {
@@ -64,8 +64,27 @@ function Products() {
       }
     })
   }, [items])
+  const thumb = (p) => {
+    if (!p) return "";
 
-  console.log( 'and productList:', productList.image)
+    // Priority 1: images array (new format)
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      return p.images[0];
+    }
+
+    // Priority 2: old image field (backward compatibility)
+    if (Array.isArray(p.image) && p.image.length > 0) {
+      return p.image[0];
+    }
+
+    // Priority 3: single string (very old format)
+    if (typeof p.image === "string" && p.image) {
+      return p.image;
+    }
+
+    return "";
+  };
+  console.log('and productList:', thumb(items[0]),)
 
   const openProduct = (id) => {
     if (!id) return
@@ -173,10 +192,20 @@ function Products() {
 
           <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
             {productList.map((product) => (
-              
+
               <article key={product._id} className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                 <div className="aspect-[4/4.5] overflow-hidden">
-                  <img src={`${baseurl}/${product.image}`} alt={product.name} onClick={() => openProduct(product._id)} className="h-full w-full cursor-pointer object-cover transition-transform duration-700 hover:scale-105" />
+                  {thumb(product) ? (
+                      <img
+                        src={`${baseurl}/${thumb(product)}`}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <LuPackageSearch size={28} />
+                      </div>
+                    )}
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">{product.category}</p>
